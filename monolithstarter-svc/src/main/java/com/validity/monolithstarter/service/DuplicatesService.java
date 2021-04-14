@@ -3,15 +3,58 @@ package com.validity.monolithstarter.service;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.util.ArrayList;
+
+import org.json.simple.*;
 
 @Service
 public class DuplicatesService {
     public Object getDuplicates() {
         try  {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("C:\\Users\\gm117\\Downloads\\simple-app-starter\\simple-app-starter\\test-files\\normal.csv"), "UTF-8"));
-            String line = reader.readLine();
-            line = reader.readLine();
-            System.out.println(line);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("/home/geo/Coding/SampleApp/test-files/normal.csv"), "UTF-8"));
+            String line = reader.readLine(); // I already know what the schema is, no need for this line
+
+            ArrayList<Data> entries = new ArrayList<>();
+            ArrayList<Data> unique = new ArrayList<>();
+            ArrayList<Data> duplicates = new ArrayList<>();
+
+            boolean running = true;
+            while (true) {
+                line = reader.readLine();
+                if (line == null || line.equals("")) break;
+                //System.out.println(line);
+                String[] values = line.split(",");
+                Data entry = new Data(Integer.parseInt(values[0]), values[1], values[2], values[3], values[4], values[5], values[6], values[7], values[8], values[9], values[10], values[11]);
+                boolean dup = false;
+                for (Data d : entries) {
+                    if (entry.equals(d)) {
+                        // Put the entry in the list of duplicates and stop looking
+                        duplicates.add(entry);
+                        dup = true;
+                        break;
+                    }
+                }
+                if (!dup) {
+                    // Didn't find a matching value, add to the list of unique entries
+                    unique.add(entry);
+                }
+                // Keep a list of all the entries, regardless of whether or not they're duplicates
+                entries.add(entry);
+            }
+
+            System.out.println(unique.size() + " " + duplicates.size() + " " + entries.size());
+            for (Data d : unique) {
+                System.out.print(d.id + ", ");
+            }
+            System.out.println("");
+
+            JSONObject json = new JSONObject();
+
+            // Just get the data in somehow
+            for (int i = 0; i < unique.size(); i++) {
+                
+            }
+
             return line;
         } catch (IOException e) {
             e.printStackTrace();
@@ -58,10 +101,12 @@ public class DuplicatesService {
                 if (this.lastName.toLowerCase().equals(check.getLastName().toLowerCase())) {
 
                     if (this.email.toLowerCase().equals(check.getEmail().toLowerCase())) {
+                        // First nae, last name, and email should constitute a unique value
                         return true;
                     }
 
                     if (this.phone.equals(check.getPhone())) {
+                        // Same should be true with phone
                         return true;
                     }
                 }
@@ -83,6 +128,12 @@ public class DuplicatesService {
 
         public String getPhone() {
             return this.phone;
+        }
+
+        public String toString() {
+            //id,first_name,last_name,company,email,address1,address2,zip,city,state_long,state,phone
+            return this.id + "," + this.firstName + "," + this.lastName + "," + this.company + "," + this.email + "," + this.address1 + "," + this.address2 + "," + this.zip
+                + "," + this.city + "," + this.stateLong + "," + this.state + "," + this.phone + ",";
         }
     }
 }
