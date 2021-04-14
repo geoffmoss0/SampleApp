@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 import org.json.simple.*;
 
@@ -11,7 +12,7 @@ import org.json.simple.*;
 public class DuplicatesService {
     public Object getDuplicates() {
         try  {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("/home/geo/Coding/SampleApp/test-files/normal.csv"), "UTF-8"));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("C:\\Users\\gm117\\Downloads\\simple-app-starter\\simple-app-starter\\test-files\\normal.csv"), "UTF-8"));
             String line = reader.readLine(); // I already know what the schema is, no need for this line
 
             ArrayList<Data> entries = new ArrayList<>();
@@ -42,20 +43,35 @@ public class DuplicatesService {
                 entries.add(entry);
             }
 
+            /*
             System.out.println(unique.size() + " " + duplicates.size() + " " + entries.size());
             for (Data d : unique) {
                 System.out.print(d.id + ", ");
             }
             System.out.println("");
+             */
 
-            JSONObject json = new JSONObject();
+            LinkedHashMap<Integer, String> mapToJson = new LinkedHashMap<>();
 
             // Just get the data in somehow
+            // I'm just using the first library I found, there's obviously better ways to do this
             for (int i = 0; i < unique.size(); i++) {
-                
+                mapToJson.put(i, unique.get(i).toString());
             }
 
-            return line;
+            String jsonUnique = JSONValue.toJSONString(mapToJson);
+            mapToJson = new LinkedHashMap<>();
+            for (int i = 0; i < duplicates.size(); i++) {
+                mapToJson.put(i, duplicates.get(i).toString());
+            }
+
+            String jsonDuplicates = JSONValue.toJSONString(mapToJson);
+
+            JSONObject jsonOut = new JSONObject();
+            jsonOut.put("unique", jsonUnique);
+            jsonOut.put("duplicates", jsonDuplicates);
+
+            return jsonOut.toString();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -101,7 +117,7 @@ public class DuplicatesService {
                 if (this.lastName.toLowerCase().equals(check.getLastName().toLowerCase())) {
 
                     if (this.email.toLowerCase().equals(check.getEmail().toLowerCase())) {
-                        // First nae, last name, and email should constitute a unique value
+                        // First name, last name, and email should constitute a unique value
                         return true;
                     }
 
@@ -133,7 +149,7 @@ public class DuplicatesService {
         public String toString() {
             //id,first_name,last_name,company,email,address1,address2,zip,city,state_long,state,phone
             return this.id + "," + this.firstName + "," + this.lastName + "," + this.company + "," + this.email + "," + this.address1 + "," + this.address2 + "," + this.zip
-                + "," + this.city + "," + this.stateLong + "," + this.state + "," + this.phone + ",";
+                + "," + this.city + "," + this.stateLong + "," + this.state + "," + this.phone;
         }
     }
 }
